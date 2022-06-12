@@ -10,7 +10,11 @@ namespace PRO506
     public class TaxCalculator
     {
         private readonly TaxRates _taxRates;
-
+        private const int NumberWeeksYearly = 52;
+        private const int NumberHoursWekly = 40;
+        private const int NumberOfPercents = 100;
+        private const int FortnightlyNumberOfWeeks = 2;
+        public const int HumberOfHoursForghtnigtlyPay = 80;
         // "taxRates" table of tax rates for each threashold. not nullable.
         public TaxCalculator(TaxRates taxRates)
         {
@@ -18,9 +22,24 @@ namespace PRO506
             this._taxRates = taxRates;
         }
 
-        public double CalculateNetAnnualSalary(double annualIncome)
+        public double CalculateNetAnnualSalary(double grossAnnualIncome, double kiwiSaver)
         {
-            return 0;
+            return grossAnnualIncome - CalculateTax(grossAnnualIncome) - kiwiSaver;
+        }
+
+        public double CalculateFortnightlyPay(double income)
+        {
+            return income / NumberWeeksYearly * FortnightlyNumberOfWeeks;
+        }
+
+        public double CalculateKiwiSaver(double grossAnnualIncome, double kiwiSaver)
+        {
+            return grossAnnualIncome * kiwiSaver / NumberOfPercents;//Calcualte kivi saver
+        }
+
+        public double CalculateHourlyRate(double grossAnnualIncome)
+        {
+            return grossAnnualIncome / NumberWeeksYearly / NumberHoursWekly;//Hourly rate of employee
         }
 
         // returns tax value based on annual salary, "annualIncome" is annual salary in dollars
@@ -66,9 +85,5 @@ namespace PRO506
                      (14000 * _taxRates.UpTo14000);
         }
 
-        public double CalculateKiwiSaver(double annualIncome, double kiwiSaverPercentage)
-        {
-            return annualIncome * kiwiSaverPercentage;
-        }
     }
 }

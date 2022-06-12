@@ -1,4 +1,5 @@
-﻿using System;
+﻿using PRO506;
+using System;
 using System.Collections.Generic;
 using System.IO;
 
@@ -10,6 +11,16 @@ namespace Task
      */
     class Program
     {
+        //all taxation values for each threashold
+        private readonly TaxRates _taxRates = new TaxRates
+        {
+            UpTo14000 = 0.105,
+            Over14000UpTo48000 = 0.175,
+            Over48000UpTo70000 = 0.3,
+            Over70000UpTo180000 = 0.33,
+            Over180000 = 0.39
+        };
+        private readonly TaxCalculator _taxCalculator;
         //List for employees and their payrolls (or dynamic arrays)
         private List<Employee> employees;
 
@@ -23,6 +34,7 @@ namespace Task
         public Program()
         {
             employees = new List<Employee>();//Initializes employee list
+            _taxCalculator = new TaxCalculator(_taxRates);// init tax calculator
             readEmployees();//Read employees from the file
             calculateFortnight();//Calculate fortnite of all employees
             runner();//Runs the main loop of the program
@@ -145,8 +157,7 @@ namespace Task
         //Calculate each employee's fortnight
         public void calculateFortnight()
         {
-            for (int i = 0; i < employees.Count; i++)//Set payrolls for the all employees
-                setPayroll(i);
+            setPayroll(employees);
         }
 
         //Print payroll of searched employee
@@ -261,33 +272,35 @@ namespace Task
         }
 
         //Calculate payroll against an employee id and set its value
-        public void setPayroll(int index)
+        public void setPayroll(IEnumerable<Employee> employees)
         {
-            Employee employee = employees[index];//Employee at index
-            double hourlyRate = (employee.income / 52 / 40);//Hourly rate of employee
-            double grossFortnightSalary = hourlyRate * 80;//2 week salary
-            double kiwiSaver = grossFortnightSalary * employee.kiwiSaver / 100;//Calcualte kivi saver value
-            double tax = 0;//Tax variable
-            int hoursWorked = 80;//Hours worked
-            //Calculate tax value
-            if (employee.income <= 14000)
-                tax = grossFortnightSalary * 10.5 / 100;
-            else if (employee.income <= 48000)
-                tax = grossFortnightSalary * 17.5 / 100;
-            else if (employee.income <= 70000)
-                tax = grossFortnightSalary * 30.0 / 100;
-            else if (employee.income <= 180000)
-                tax = grossFortnightSalary * 33.0 / 100;
-            else
-                tax = employee.income * 39 / 100;
-            double fortnightPay = grossFortnightSalary - kiwiSaver - tax;//Calcualte fortnite net pay
-            employee.payroll = new payroll(hourlyRate: (int)Math.Round(hourlyRate), hoursWorked: hoursWorked, grossPay: (int)Math.Round(grossFortnightSalary), (int)Math.Round(fortnightPay), (int)Math.Round(tax), (int)Math.Round(kiwiSaver));//Set employee payroll
-            employees[index] = employee;//Set the new employee
+            foreach (var empl in employees)
+            {
+                double hourlyRate = _taxCalculator.CalculateHourlyRate(empl.income);//Hourly rate of employee
+
+                double annualKiwiSaver = _taxCalculator.CalculateKiwiSaver(empl.income, empl.kiwiSaver);//Calcualte kivi saver value
+                double annualTax = _taxCalculator.CalculateTax(empl.income);//Tax variable
+                                                                            // int hoursWorked1 = 80;//Hours worked
+                double netSalaryAnnualy = _taxCalculator.CalculateNetAnnualSalary(empl.income, empl.kiwiSaver);
+
+                double fortnlightlyNetSalary = _taxCalculator.CalculateFortnightlyPay(netSalaryAnnualy);
+                double fortnlightlyKiwiSaver = _taxCalculator.CalculateFortnightlyPay(annualKiwiSaver);
+                double fortnlightlyTax = _taxCalculator.CalculateFortnightlyPay(annualTax);
+                double grossFortnlightlySalary = _taxCalculator.CalculateFortnightlyPay(empl.income);
+
+                empl.payroll = new Payroll(hourlyRate: (int)Math.Round(hourlyRate),
+                                           hoursWorked: TaxCalculator.HumberOfHoursForghtnigtlyPay,//use here constant because 80 hours is always 80 hours Forghtnigtly
+                                           grossPay: (int)Math.Round(grossFortnlightlySalary),
+                                           fortnightlyNetPayroll: (int)Math.Round(fortnlightlyNetSalary),
+                                           tax: (int)Math.Round(fortnlightlyTax),
+                                           kiwiSaver: (int)Math.Round(fortnlightlyKiwiSaver));//Set employee payroll
+            }
+
         }
     }
 
     //Structure Employee
-    struct Employee
+    public class Employee
     {
         //Properties
         public int id { get; set; }
@@ -296,8 +309,7 @@ namespace Task
         public double income { get; set; }
         public float kiwiSaver { get; set; }
 
-        public payroll payroll { get; set; }
-
+        public Payroll payroll { get; set; }
         //Constructor
         public Employee(int id, string firstName, string lastName, double income, float kiwiSaver)
         {
@@ -306,7 +318,6 @@ namespace Task
             this.lastName = lastName;
             this.income = income;
             this.kiwiSaver = kiwiSaver;
-            payroll = null;
         }
         //To String
         public string toString()
@@ -328,24 +339,24 @@ namespace Task
     }
 
     //Payroll class
-    class payroll
+    public class Payroll
     {
         //Properties
         public int hourlyRate { get; set; }
         public int hoursWorked { get; set; }
         public float grossPay { get; set; }
-        public float fortnightPayroll { get; set; }
+        public float fortnightlyNetPayroll { get; set; }
 
         public float tax { get; set; }
         public float kiwiSaver { get; set; }
 
         //Constructors
-        public payroll(int hourlyRate, int hoursWorked, float grossPay, float fortnightPayroll, float tax, float kiwiSaver)
+        public Payroll(int hourlyRate, int hoursWorked, float grossPay, float fortnightlyNetPayroll, float tax, float kiwiSaver)
         {
             this.hourlyRate = hourlyRate;
             this.hoursWorked = hoursWorked;
             this.grossPay = grossPay;
-            this.fortnightPayroll = fortnightPayroll;
+            this.fortnightlyNetPayroll = fortnightlyNetPayroll;
             this.tax = tax;
             this.kiwiSaver = kiwiSaver;
         }
@@ -362,7 +373,7 @@ namespace Task
                 "Tax : " + this.tax + "$" + "\n" +
                 "Kiwi Saver : " + this.kiwiSaver + "$" + "\n" +
                 Program.printTitle("PAY") + "\n" +
-                "Fortnight Payroll : " + this.fortnightPayroll + "$" + "\n";
+                "Fortnightly Net Payroll : " + this.fortnightlyNetPayroll + "$" + "\n";
         }
     }
 
