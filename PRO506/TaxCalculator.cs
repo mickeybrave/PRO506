@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace PRO506
 {
     // Calculates salary, tax, net, kiwi saver
-    public class TaxCalculator
+    public struct TaxCalculator
     {
         private readonly TaxRates _taxRates;
         private const int NumberWeeksYearly = 52;
@@ -15,10 +15,17 @@ namespace PRO506
         private const int NumberOfPercents = 100;
         private const int FortnightlyNumberOfWeeks = 2;
         public const int HumberOfHoursForghtnigtlyPay = 80;
+        private const int Threashold14k = 14000;
+        private const int Threashold48k = 48000;
+        private const int ThreasholdBetween14kAnd48k = 34000;
+        private const int ThreasholdBetween48kAnd70k = 22000;
+        private const int ThreasholdBetween70kAnd180k = 110000;
+        private const int Threashold70k = 70000;
+        private const int Threashold180k = 180000;
+
         // "taxRates" table of tax rates for each threashold. not nullable.
         public TaxCalculator(TaxRates taxRates)
         {
-            if (taxRates == null) throw new ArgumentNullException("Cannot be null", "taxRates");
             this._taxRates = taxRates;
         }
 
@@ -47,42 +54,41 @@ namespace PRO506
         {
             if (annualIncome <= 0) return 0;
             //in this block annual salary less than 14000, for instance 10000
-            if (annualIncome <= 14000)
+            if (annualIncome <= Threashold14k)
             {
                 return annualIncome * _taxRates.UpTo14000;
             }
+
             // in this block annual salary higher than 14000, but less than 48000 for instance 45000
-            if (annualIncome > 14000 && annualIncome <= 48000)
+            if (annualIncome > Threashold14k && annualIncome <= Threashold48k)
             {
-                return (annualIncome - 14000) * _taxRates.Over14000UpTo48000 +
-                    (14000 * _taxRates.UpTo14000);
+                return (annualIncome - Threashold14k) * _taxRates.Over14000UpTo48000 +
+                    Threashold14k * _taxRates.UpTo14000;
             }
 
             // in this block annual salary higher than 48000, but less than 70000 for instance 60000
-            if (annualIncome > 48000 && annualIncome <= 70000)
+            if (annualIncome > Threashold48k && annualIncome <= Threashold70k)
             {
-                return (annualIncome - 48000) * _taxRates.Over48000UpTo70000 +
-                     (48000 - 14000) * _taxRates.Over14000UpTo48000 +
-                     (14000 * _taxRates.UpTo14000);
+                return (annualIncome - Threashold48k) * _taxRates.Over48000UpTo70000 +
+                     ThreasholdBetween14kAnd48k * _taxRates.Over14000UpTo48000 +
+                     Threashold14k * _taxRates.UpTo14000;
             }
 
-            //
             // in this block annual salary higher than 70000, but less than 180000 for instance 100000
-            if (annualIncome > 70000 && annualIncome <= 180000)
+            if (annualIncome > Threashold70k && annualIncome <= Threashold180k)
             {
-                return
-                     (annualIncome - 70000) * _taxRates.Over70000UpTo180000 +
-                     (70000 - 48000) * _taxRates.Over48000UpTo70000 +
-                     (48000 - 14000) * _taxRates.Over14000UpTo48000 +
-                     (14000 * _taxRates.UpTo14000);
+                return (annualIncome - Threashold70k) * _taxRates.Over70000UpTo180000 +
+                     ThreasholdBetween48kAnd70k * _taxRates.Over48000UpTo70000 +
+                     ThreasholdBetween14kAnd48k * _taxRates.Over14000UpTo48000 +
+                     Threashold14k * _taxRates.UpTo14000;
             }
 
             //in this block all the rest of the cases, means higher than 180000, for instance 200000 or 10000000000000 (what ever)
-            return (annualIncome - 180000) * _taxRates.Over180000 +
-                     (180000 - 70000) * _taxRates.Over70000UpTo180000 +
-                     (70000 - 48000) * _taxRates.Over48000UpTo70000 +
-                     (48000 - 14000) * _taxRates.Over14000UpTo48000 +
-                     (14000 * _taxRates.UpTo14000);
+            return (annualIncome - Threashold180k) * _taxRates.Over180000 +
+                     ThreasholdBetween70kAnd180k * _taxRates.Over70000UpTo180000 +
+                     ThreasholdBetween48kAnd70k * _taxRates.Over48000UpTo70000 +
+                     ThreasholdBetween14kAnd48k * _taxRates.Over14000UpTo48000 +
+                     Threashold14k * _taxRates.UpTo14000;
         }
 
     }

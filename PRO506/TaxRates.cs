@@ -9,7 +9,7 @@ namespace PRO506
     /// <summary>
     /// Represents threasholds
     /// </summary>
-    public class TaxRates
+    public struct TaxRates
     {
         /// <summary>
         /// Tax value for up to 14000
