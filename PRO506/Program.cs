@@ -5,6 +5,14 @@ using System.IO;
 
 namespace Task
 {
+    class main
+    {
+        static void Main(string[] args)
+        {
+            new Program();
+        }
+    }
+
     /*
      *  Main struct that holds all the functionality
      *  of the code i.e. 'Program'
@@ -22,7 +30,7 @@ namespace Task
         };
         private readonly TaxCalculator _taxCalculator;
         //List for employees and their payrolls (or dynamic arrays)
-        private List<Employee> _employees;
+        private  List<Employee> _employees = new List<Employee>();//Initializes employee list
 
         /*
          * Constructor to initialize the lists
@@ -33,11 +41,10 @@ namespace Task
          */
         public Program()
         {
-            _employees = new List<Employee>();//Initializes employee list
-            _taxCalculator = new TaxCalculator(_taxRates);// init tax calculator
-            readEmployees();//Read employees from the file
-            CalculateFortnight();//Calculate fortnite of all employees
-            runner();//Runs the main loop of the program
+            _taxCalculator = new TaxCalculator(_taxRates);// Initializes tax calculator
+            ReadEmployees();//Read employees from the file and set our _employees by values from the text file
+            CalulatePayroll(_employees);//Calculate Fortnight pay for all employees. update _employees values by calculated figures from _taxCalculator
+            RunUserInterface();//Runs the interface with the user
         }
 
         /*
@@ -49,20 +56,21 @@ namespace Task
          * show the menu and read user input. As exit is true
          * !exit becomes false and false breaks the loop.
          */
-        public void runner()
+        public void RunUserInterface()
         {
             bool exit = false;//Exit variable to exit the loop
             do//Do run the program 1st time and if user wants to exit then exit the program 
             {
-                displayMenu();//Display menu
-                processUserRequest(userInput(), ref exit);//Process user request upon input
+                DisplayMenu();//Display menu
+                ConsoleKey keyChoosenByTheUser = ReadUserInput();
+                ProcessUserRequest(keyChoosenByTheUser, ref exit);//Process user request upon input
             } while (!exit);//Exit when user wants to exit
         }
 
         /*
          * Displays the menu to the user
          */
-        public void displayMenu()
+        public void DisplayMenu()
         {
             Console.WriteLine(PrintTitle("WELCOME TO NEW KIWI GARAGE PAYROLL SYSTEM"));//Write main title
             Console.WriteLine("\n\n");//Next line and next line
@@ -80,7 +88,13 @@ namespace Task
          * Reads user key and converts to
          * an int and returns the value.
          */
-        public ConsoleKey userInput() => Console.ReadKey().Key;//returns expresseion after reading the user key
+        public ConsoleKey ReadUserInput()
+        {
+            //returns expresseion after reading the user key;
+            var consoleKeyInfo = Console.ReadKey();//full information from the user input 
+            //but we need only the key pressed in the keyboard (number, space, f1, escape, ctrl etc)
+            return consoleKeyInfo.Key;
+        }
 
         /*
          * Reads employees from a file naming employees.txt.
@@ -95,15 +109,24 @@ namespace Task
          * These values are stored in employees list as a new Employee().
          * After reading file contents, file is closed properly.
          */
-        public void readEmployees()
+        public void ReadEmployees()
         {
-            FileStream fileStream = new FileStream("employees.txt", FileMode.Open, FileAccess.Read);//Create file stream object with open and read modes
-            StreamReader streamReader = new StreamReader(fileStream);//Create file reader object
-            streamReader.BaseStream.Seek(0, SeekOrigin.Begin);//Return carret to the start of the file
-            for (string line = streamReader.ReadLine(); line != null; line = streamReader.ReadLine())//Read line and store in the string. Read till the read line is not empty.
+            // (convert text file txt into the way that C# can ready it)
+            FileStream fileStream = new FileStream("employees.txt", FileMode.Open, FileAccess.Read);
+            //Create file reader object that can read pieces of information and convert them into objects that C# can understand. for instance string, int etc
+            StreamReader streamReader = new StreamReader(fileStream);
+            //Return carret to the start of the file. settings to read from the beginning
+            streamReader.BaseStream.Seek(0, SeekOrigin.Begin);
+            //Read line by line and store in the string. Read till the read line is not empty. each world in file separated by space
+            for (string line = streamReader.ReadLine(); line != null; line = streamReader.ReadLine())
             {
-                string[] employee = line.Split(' ');//Split the read values by a space and returns each value to the array
-                _employees.Add(new Employee(int.Parse(employee[0]), employee[1], employee[2], double.Parse(employee[3]), float.Parse(employee[4]), new Payroll()));//Store the values in the employee
+                //Split the read values by a space and returns each value to the array
+                string[] employee = line.Split(' ');// we know that words are separated by empty space
+                //we know in want place in text file each property is located: id in the first place (0), first name in second (1) etc.
+                _employees.Add(new Employee(id: int.Parse(employee[0]),
+                    firstName: employee[1], lastName: employee[2], 
+                    income: double.Parse(employee[3]),
+                    kiwiSaverRate: float.Parse(employee[4])));//Store the values in the employee struct by creation of a new struct
             }
             streamReader.Close();//Close the reader 
             fileStream.Close();//Close the file
@@ -124,14 +147,19 @@ namespace Task
          * default:
          *      exit
          */
-        public void processUserRequest(ConsoleKey key, ref bool exit)
+        //"key" is is the input from the user pressed on the kayboard. maybe any key/button from the key board: F1, number from 1 to 0, lette, whitespace etc
+        //in this method we only react on the expected key pressed
+        public void ProcessUserRequest(ConsoleKey key, ref bool exit)
         {
             Console.Clear();
+            //here programm is reading user input. if user input is expected, act accordingly to the input.
+            //if user press 1 from any part of the keyboard (may be 2 options) - then PrintPayroll
+            // if user press 2 from any part of the keyboard (may be 2 options) - then OrderEmployeesById and PrintEmployee
             switch (key)
             {
-                case ConsoleKey.D1://Key is 1
+                case ConsoleKey.D1://Key is 1 (user pressed 1)
                 case ConsoleKey.NumPad1://Key is num1
-                    PrintPayroll();//Calculate payroll
+                    PrintPayroll();//print previously calculated payroll
                     break;
                 case ConsoleKey.D2://Key is 2
                 case ConsoleKey.NumPad2://Key is num2
@@ -148,17 +176,14 @@ namespace Task
                     break;
                 default://Any other key pressed
                     exit = true;//Exit the loop or program
+                    Console.WriteLine($"key={key} is not in the list of options. Please, press the right key from the given list.");
                     return;
             }
             Console.WriteLine("Press any key to continue....");//Write instruction line
             Console.ReadKey();//Wait for the key to be pressed
             Console.Clear();//Clear the console
         }
-        //Calculate each employee's fortnight
-        public void CalculateFortnight()
-        {
-            SetPayroll(_employees);
-        }
+       
 
         //Print payroll of searched employee
         public void PrintPayroll()
@@ -172,21 +197,21 @@ namespace Task
 
             bool res;
             int userIdConverted;
-            if(! int.TryParse(idInput, out userIdConverted))
+            if (!int.TryParse(idInput, out userIdConverted))
             {
                 Console.WriteLine($"{idInput} is not a valid id");
                 return;
             }
 
-            Employee? employee = search(userIdConverted);
+            Employee? employee = Search(userIdConverted);
             //Clear the console
             Console.Clear();
             //If employee was found i.e. not null
             //Then print employee and his payroll
             if (employee != null)
             {
-                Console.WriteLine(((Employee)employee).Print());//Print employees
-                Console.WriteLine(((Employee)employee).Payroll.Print());//Print their payroll
+                Console.WriteLine(((Employee)employee).PrintEmployeeDetails());//Print employees
+                Console.WriteLine(((Employee)employee).PrintPayrollDetails());//Print their payroll
             }
             else
                 //Otherwise print invalid id
@@ -223,7 +248,7 @@ namespace Task
         public void SearchEmployee()
         {
             Console.WriteLine("Please enter the id of employee : ");//print instruction
-            Employee? employee = search(int.Parse(Console.ReadLine()));//Search for the employee at read id
+            Employee? employee = Search(int.Parse(Console.ReadLine()));//Search for the employee at read id
             Console.Clear();//Clear the console
             if (employee != null)//If employee was null
             {
@@ -238,7 +263,7 @@ namespace Task
         }
 
         //Search for an employee against id and return it
-        public Employee? search(int id)
+        public Employee? Search(int id)
         {
             foreach (Employee e in _employees)//For each employee in the employees
                 if (e.Id == id)//If id matches
@@ -257,8 +282,8 @@ namespace Task
             StreamWriter streamWriter = new StreamWriter(fileStream);//Create file writer
             foreach (Employee employee in _employees)//For employee in employees
             {
-                streamWriter.Write(employee.Print() + "\n");//Write employee in the file
-                streamWriter.Write(employee.Payroll.Print() + "\n");//Write payroll in the file
+                streamWriter.Write(employee.PrintEmployeeDetails() + "\n");//Write employee in the file
+                streamWriter.Write(employee.PrintPayrollDetails() + "\n");//Write payroll in the file
             }
             streamWriter.Close();//Close the writer
             fileStream.Close();//Close the file
@@ -282,28 +307,37 @@ namespace Task
         }
 
         //Calculate payroll against an employee id and set its value
-        public void SetPayroll(List<Employee> employees)
+        public void CalulatePayroll(List<Employee> employees)
         {
             for (int i = 0; i < employees.Count(); i++)
             {
                 double hourlyRate = _taxCalculator.CalculateHourlyRate(employees[i].Income);//Hourly rate of employee
 
-                double annualKiwiSaver = _taxCalculator.CalculateKiwiSaver(employees[i].Income, employees[i].KiwiSaver);//Calcualte kivi saver value
+                double annualKiwiSaver = _taxCalculator.CalculateKiwiSaver(employees[i].Income, employees[i].KiwiSaverRate);//Calcualte kivi saver value
                 double annualTax = _taxCalculator.CalculateTax(employees[i].Income);//Tax variable
                                                                                     // int hoursWorked1 = 80;//Hours worked
-                double netSalaryAnnualy = _taxCalculator.CalculateNetAnnualSalary(employees[i].Income, employees[i].KiwiSaver);
+                double netSalaryAnnualy = _taxCalculator.CalculateNetAnnualSalary(employees[i].Income, employees[i].KiwiSaverRate);
 
                 double fortnlightlyNetSalary = _taxCalculator.CalculateFortnightlyPay(netSalaryAnnualy);
                 double fortnlightlyKiwiSaver = _taxCalculator.CalculateFortnightlyPay(annualKiwiSaver);
                 double fortnlightlyTax = _taxCalculator.CalculateFortnightlyPay(annualTax);
                 double grossFortnlightlySalary = _taxCalculator.CalculateFortnightlyPay(employees[i].Income);
 
-                employees[i].SetPayroll(new Payroll(hourlyRate: (int)Math.Round(hourlyRate),
+                //create a new employee struct to be able to set values of payroll properties
+                // as far as the employee is a struct (value type), we must create a new instance to set new calculated values 
+                employees[i] = new Employee(id: employees[i].Id,
+                                           firstName: employees[i].FirstName,
+                                           lastName: employees[i].LastName,
+                                           income: employees[i].Income,
+                                           kiwiSaverRate: employees[i].KiwiSaverRate,
+                                           hourlyRate: (int)Math.Round(hourlyRate),
                                            hoursWorked: TaxCalculator.HumberOfHoursForghtnigtlyPay,//use here constant because 80 hours is always 80 hours Forghtnigtly
                                            grossPay: (int)Math.Round(grossFortnlightlySalary),
                                            fortnightlyNetPayroll: (int)Math.Round(fortnlightlyNetSalary),
                                            tax: (int)Math.Round(fortnlightlyTax),
-                                           kiwiSaver: (int)Math.Round(fortnlightlyKiwiSaver)));//Set employee payroll
+                                           kiwiSaverAmount: (int)Math.Round(fortnlightlyKiwiSaver));
+
+
             }
 
 
@@ -314,35 +348,72 @@ namespace Task
     public struct Employee
     {
         //Properties
+        #region Employee info
         public int Id { get; set; }
         public string FirstName { get; set; }
         public string LastName { get; set; }
         public double Income { get; set; }
-        public float KiwiSaver { get; set; }
+        public float KiwiSaverRate { get; set; }
+        #endregion
 
-        public Payroll Payroll { get; private set; }
+        #region Payroll info
+        public int HourlyRate { get; set; }
+        public int HoursWorked { get; set; }
+        public float GrossPay { get; set; }
+        public float FortnightlyNetPayroll { get; set; }
+
+        public float Tax { get; set; }
+        public float KiwiSaverAmount { get; set; }
+        #endregion
+
         //Constructor
-        public Employee(int id, string firstName, string lastName, double income, float kiwiSaver, Payroll payroll)
+        public Employee(int id, string firstName, string lastName, double income, float kiwiSaverRate)
         {
-            this.Id = id;
-            this.FirstName = firstName;
-            this.LastName = lastName;
-            this.Income = income;
-            this.KiwiSaver = kiwiSaver;
-            this.Payroll = payroll;
+            Id = id;
+            FirstName = firstName;
+            LastName = lastName;
+            Income = income;
+            KiwiSaverRate = kiwiSaverRate;
+            GrossPay = 0;
+            HourlyRate = 0;
+            HoursWorked = 0;
+            HourlyRate = 0;
+            FortnightlyNetPayroll = 0;
+            Tax = 0;
+            KiwiSaverAmount = 0;
+        }
+        public Employee(int id,
+            string firstName,
+            string lastName,
+            double income,
+            float kiwiSaverRate,
+            int hourlyRate,
+            int hoursWorked,
+            float grossPay,
+            float fortnightlyNetPayroll,
+            float tax,
+            float kiwiSaverAmount)
+        {
+            Id = id;
+            FirstName = firstName;
+            LastName = lastName;
+            Income = income;
+            KiwiSaverRate = kiwiSaverRate;
+            HourlyRate = hourlyRate;
+            HoursWorked = hoursWorked;
+            GrossPay = grossPay;
+            FortnightlyNetPayroll = fortnightlyNetPayroll;
+            Tax = tax;
+            KiwiSaverAmount = kiwiSaverAmount;
         }
         //To String
         public string ToString()
         {
-            return String.Format("|{0,-11}\t|{1,-19}\t|{2,-18}\t|{3,-13}\t|{4,-15}|", Id, FirstName, LastName, Income, KiwiSaver + "%");//String in the format 
+            return String.Format("|{0,-11}\t|{1,-19}\t|{2,-18}\t|{3,-13}\t|{4,-15}|", Id, FirstName, LastName, Income, KiwiSaverRate + "%");//String in the format 
         }
 
-        public void SetPayroll(Payroll payroll)
-        {
-            this.Payroll = payroll;
-        }
         //Print values
-        public string Print()
+        public string PrintEmployeeDetails()
         {
             return
                 Program.PrintTitle("EMPLOYEE DETAILS") + "\n" +
@@ -350,35 +421,10 @@ namespace Task
                 "First Name : " + this.FirstName + "\n" +
                 "Last Name : " + this.LastName + "\n" +
                 "Yearly Income : " + this.Income + "\n" +
-                "Kiwi Saver : " + this.KiwiSaver + "%" + "\n";
-        }
-    }
-
-    //Payroll struct
-    public struct Payroll
-    {
-        //Properties
-        public int HourlyRate { get; set; }
-        public int HoursWorked { get; set; }
-        public float GrossPay { get; set; }
-        public float FortnightlyNetPayroll { get; set; }
-
-        public float Tax { get; set; }
-        public float KiwiSaver { get; set; }
-
-        //Constructors
-        public Payroll(int hourlyRate, int hoursWorked, float grossPay, float fortnightlyNetPayroll, float tax, float kiwiSaver)
-        {
-            this.HourlyRate = hourlyRate;
-            this.HoursWorked = hoursWorked;
-            this.GrossPay = grossPay;
-            this.FortnightlyNetPayroll = fortnightlyNetPayroll;
-            this.Tax = tax;
-            this.KiwiSaver = kiwiSaver;
+                "Kiwi Saver rate: " + this.KiwiSaverRate + "%" + "\n";
         }
 
-        //print payroll
-        public string Print()
+        public string PrintPayrollDetails()
         {
             return
                 Program.PrintTitle("PAYROLL") + "\n" +
@@ -387,17 +433,12 @@ namespace Task
                 "Gross Pay : " + this.GrossPay + "$" + "\n" +
                 "DEDUCTIONS" + "\n" +
                 "Tax : " + this.Tax + "$" + "\n" +
-                "Kiwi Saver : " + this.KiwiSaver + "$" + "\n" +
+                "Kiwi Saver : " + this.KiwiSaverAmount + "$" + "\n" +
                 Program.PrintTitle("PAY") + "\n" +
                 "Fortnightly Net Payroll : " + this.FortnightlyNetPayroll + "$" + "\n";
         }
     }
 
-    class main
-    {
-        static void Main(string[] args)
-        {
-            new Program();
-        }
-    }
+
+
 }
