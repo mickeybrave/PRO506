@@ -151,14 +151,15 @@ namespace Task
          * default:
          *      exit
          */
-        //"key" is is the input from the user pressed on the kayboard. maybe any key/button from the key board: F1, number from 1 to 0, lette, whitespace etc
+        //"key" is is the input from the user pressed on the kayboard. maybe any key/button from the key board:
+        //F1, number from 1 to 0, lette, whitespace etc
         //in this method we only react on the expected key pressed
         public void ProcessUserRequest(ConsoleKey key, ref bool exit)
         {
             Console.Clear();
             //here programm is reading user input. if user input is expected, act accordingly to the input.
-            //if user press 1 from any part of the keyboard (may be 2 options) - then PrintPayroll
-            // if user press 2 from any part of the keyboard (may be 2 options) - then OrderEmployeesById and PrintEmployee
+            //if user press 1 from any part of the keyboard - then PrintPayroll
+            // if user press 2 from any part of the keyboard - then OrderEmployeesById and PrintEmployee
             switch (key)
             {
                 case ConsoleKey.D1://Key is 1 (user pressed 1)
@@ -234,7 +235,8 @@ namespace Task
       */
         public void SaveData()
         {
-            FileStream fileStream = new FileStream("weekly_payroll.txt", FileMode.OpenOrCreate, FileAccess.Write);//Create file reader with open, create and write
+            //Create file reader with open, create and write
+            FileStream fileStream = new FileStream("weekly_payroll.txt", FileMode.OpenOrCreate, FileAccess.Write);
             StreamWriter streamWriter = new StreamWriter(fileStream);//Create file writer
             foreach (Employee employee in _employees)//For employee in employees
             {
@@ -318,8 +320,8 @@ namespace Task
             for (int i = 0; i < employees.Count(); i++)
             {
                 double hourlyRate = _taxCalculator.CalculateHourlyRate(employees[i].Income);//Hourly rate of employee
-
-                double annualKiwiSaver = _taxCalculator.CalculateKiwiSaver(employees[i].Income, employees[i].KiwiSaverRate);//Calcualte kivi saver value
+                //Calcualte kivi saver value
+                double annualKiwiSaver = _taxCalculator.CalculateKiwiSaver(employees[i].Income, employees[i].KiwiSaverRate);
                 double annualTax = _taxCalculator.CalculateTax(employees[i].Income);//Tax variable
                                                                                     // int hoursWorked1 = 80;//Hours worked
                 double netSalaryAnnualy = _taxCalculator.CalculateNetAnnualSalary(employees[i].Income, employees[i].KiwiSaverRate);
@@ -337,7 +339,8 @@ namespace Task
                                            income: employees[i].Income,
                                            kiwiSaverRate: employees[i].KiwiSaverRate,
                                            hourlyRate: (int)Math.Round(hourlyRate),
-                                           hoursWorked: TaxCalculator.HumberOfHoursForghtnigtlyPay,//use here constant because 80 hours is always 80 hours Forghtnigtly
+                                           hoursWorked: TaxCalculator.HumberOfHoursForghtnigtlyPay,//use here constant because
+                                                                                                   //80 hours is always 80 hours Forghtnigtly
                                            grossPay: (int)Math.Round(grossFortnlightlySalary),
                                            fortnightlyNetPayroll: (int)Math.Round(fortnlightlyNetSalary),
                                            tax: (int)Math.Round(fortnlightlyTax),
@@ -415,7 +418,8 @@ namespace Task
         //To String
         public string ToString()
         {
-            return String.Format("|{0,-11}\t|{1,-19}\t|{2,-18}\t|{3,-13}\t|{4,-15}|", Id, FirstName, LastName, Income, KiwiSaverRate + "%");//String in the format 
+            //String in the format
+            return String.Format("|{0,-11}\t|{1,-19}\t|{2,-18}\t|{3,-13}\t|{4,-15}|", Id, FirstName, LastName, Income, KiwiSaverRate + "%"); 
         }
 
         //Print values
