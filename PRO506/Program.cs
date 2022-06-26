@@ -178,6 +178,7 @@ namespace Task
                     Console.WriteLine($"key={key} is not in the list of options. Please, press the right key from the given list.");
                     return;
             }
+            Console.WriteLine("Press any key to continue....");//Write instruction line
             Console.ReadKey();//Wait for the key to be pressed
             Console.Clear();//Clear the console
         }
@@ -216,7 +217,6 @@ namespace Task
                 //Otherwise print invalid id
                 Console.WriteLine("INVALID ID!");
             }
-            Console.WriteLine("\nPRESS ANY KEY TO CONTINUE.");
         }
 
         /*
