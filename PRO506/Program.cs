@@ -43,7 +43,8 @@ namespace Task
         {
             _taxCalculator = new TaxCalculator(_taxRates);// Initializes tax calculator
             ReadEmployees();//Read employees from the file and set our _employees by values from the text file
-            CalulatePayroll(_employees);//Calculate Fortnight pay for all employees. update _employees values by calculated figures from _taxCalculator
+            CalulatePayroll(_employees);//Calculate Fortnight pay for all employees.
+                                        //update _employees values by calculated figures from _taxCalculator
             RunUserInterface();//Runs the interface with the user
         }
 
