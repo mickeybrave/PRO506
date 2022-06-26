@@ -49,7 +49,7 @@ namespace Task
         }
 
         /*
-         * Basically the runner code it won't 
+         * The RunUserInterface won't 
          * exit till user wants to exit. 
          * exit is the variable that holds the
          * information if user wants to exit or 
