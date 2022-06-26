@@ -101,13 +101,12 @@ namespace Task
          * Creates a fileStream the file modes are open and read.
          * After that returns the streamreader carret to the start i.e. 
          * SeekOrigin.Begin. Reads a line from the file till null.
-         * As the format of file is 'id first last salary kivi'
-         * which is a one line as a string. That string is then split
+         * As the format of file is 'id, first name, last name, salary, kiwi saver'
+         * which is a one line as a string. That string is split
          * by spaces between the value that gives us an array of 5 values
-         * strored in string[] employee. index 0 contains id, 1 contains 
-         * first name and so on...
+         * strored in string[] employee.
          * These values are stored in employees list as a new Employee().
-         * After reading file contents, file is closed properly.
+         * After reading file contents, file is closed.
          */
         public void ReadEmployees()
         {
