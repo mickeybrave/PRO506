@@ -173,8 +173,11 @@ namespace Task
                 case ConsoleKey.NumPad4://Key is num4
                     SaveData();//Save data to file
                     break;
-                default://Any other key pressed
+                case ConsoleKey.D0://Key is 0
+                case ConsoleKey.NumPad0://Key is num0
                     exit = true;//Exit the loop or program
+                    return;
+                default://Any other key pressed, we show a warning to the user
                     Console.WriteLine($"key={key} is not in the list of options. Please, press the right key from the given list.");
                     return;
             }
