@@ -220,6 +220,26 @@ namespace Task
             Console.WriteLine("\nPRESS ANY KEY TO CONTINUE.");
         }
 
+        /*
+      * Save the employee in weekly_payroll.txt and file
+      * modes are OpenOrCreate and write.
+      * After writing close the file
+      */
+        public void SaveData()
+        {
+            FileStream fileStream = new FileStream("weekly_payroll.txt", FileMode.OpenOrCreate, FileAccess.Write);//Create file reader with open, create and write
+            StreamWriter streamWriter = new StreamWriter(fileStream);//Create file writer
+            foreach (Employee employee in _employees)//For employee in employees
+            {
+                streamWriter.Write(employee.PrintEmployeeDetails() + "\n");//Write employee in the file
+                streamWriter.Write(employee.PrintPayrollDetails() + "\n");//Write payroll in the file
+            }
+            streamWriter.Close();//Close the writer
+            fileStream.Close();//Close the file
+            Console.Clear();//Clear the console
+            Console.WriteLine("Saved Successfully!");//Print message
+        }
+
         //Print all employees in form of a table
         public void PrintEmployee()
         {
