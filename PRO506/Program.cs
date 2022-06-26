@@ -113,20 +113,24 @@ namespace Task
         {
             // (convert text file txt into the way that C# can ready it)
             FileStream fileStream = new FileStream("employees.txt", FileMode.Open, FileAccess.Read);
-            //Create file reader object that can read pieces of information and convert them into objects that C# can understand. for instance string, int etc
+            //Create file reader object that can read pieces of information
+            //and convert them into objects that C# can understand. for instance string, int etc
             StreamReader streamReader = new StreamReader(fileStream);
             //Return carret to the start of the file. settings to read from the beginning
             streamReader.BaseStream.Seek(0, SeekOrigin.Begin);
-            //Read line by line and store in the string. Read till the read line is not empty. each world in file separated by space
+            //Read line by line and store in the string. Read till the read line is not empty.
+            //each world in file separated by space
             for (string line = streamReader.ReadLine(); line != null; line = streamReader.ReadLine())
             {
                 //Split the read values by a space and returns each value to the array
                 string[] employee = line.Split(' ');// we know that words are separated by empty space
-                //we know in want place in text file each property is located: id in the first place (0), first name in second (1) etc.
+                                                    //we know in want place in text file each property is located:
+                                                    //id in the first place (0), first name in second (1) etc.
                 _employees.Add(new Employee(id: int.Parse(employee[0]),
                     firstName: employee[1], lastName: employee[2], 
                     income: double.Parse(employee[3]),
-                    kiwiSaverRate: float.Parse(employee[4])));//Store the values in the employee struct by creation of a new struct
+                    kiwiSaverRate: float.Parse(employee[4])));//Store the values in the employee
+                                                              //struct by creation of a new struct
             }
             streamReader.Close();//Close the reader 
             fileStream.Close();//Close the file
